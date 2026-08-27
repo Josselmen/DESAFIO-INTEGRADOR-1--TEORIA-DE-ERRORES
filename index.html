@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Desafío Integrador — Cálculo I</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0d1922;
+    --bg-2:#0a141c;
+    --paper:#132530;
+    --paper-2:#1a3140;
+    --line: rgba(143,196,204,0.10);
+    --line-strong: rgba(143,196,204,0.22);
+    --ink:#e9efee;
+    --ink-muted:#8fa3ac;
+    --ink-faint:#5d7078;
+    --brass:#e3a15b;
+    --brass-dim: rgba(227,161,91,0.15);
+    --verdi:#6fbfb0;
+    --verdi-dim: rgba(111,191,176,0.15);
+    --coral:#e2694b;
+    --coral-dim: rgba(226,105,75,0.15);
+    --radius: 3px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:
+      repeating-linear-gradient(0deg, var(--line) 0px, var(--line) 1px, transparent 1px, transparent 32px),
+      repeating-linear-gradient(90deg, var(--line) 0px, var(--line) 1px, transparent 1px, transparent 32px),
+      var(--bg);
+    color:var(--ink);
+    font-family:'Inter', sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{ background:var(--brass-dim); color:var(--brass); }
+  a{ color:var(--brass); }
+
+  .mono{ font-family:'JetBrains Mono', monospace; }
+  .disp{ font-family:'Space Grotesk', sans-serif; }
+
+  /* ---------- layout shell ---------- */
+  .wrap{ max-width:920px; margin:0 auto; padding:0 24px; }
+
+  header.hero{
+    padding:72px 24px 48px;
+    position:relative;
+    border-bottom:1px solid var(--line-strong);
+  }
+  .hero-inner{ max-width:920px; margin:0 auto; position:relative; }
+  .crop{ position:absolute; width:18px; height:18px; }
+  .crop.tl{ top:-28px; left:-4px; border-top:1px solid var(--brass); border-left:1px solid var(--brass); }
+  .crop.br{ bottom:-28px; right:-4px; border-bottom:1px solid var(--brass); border-right:1px solid var(--brass); }
+
+  .eyebrow{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.18em;
+    text-transform:uppercase;
+    color:var(--verdi);
+    margin-bottom:18px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .eyebrow .dash{ width:24px; height:1px; background:var(--verdi); opacity:0.6; }
+
+  h1.title{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:600;
+    font-size:clamp(32px, 5vw, 52px);
+    line-height:1.05;
+    margin:0 0 18px;
+    letter-spacing:-0.01em;
+  }
+  h1.title em{
+    font-style:normal;
+    color:var(--brass);
+  }
+  .subtitle{
+    color:var(--ink-muted);
+    font-size:16px;
+    line-height:1.6;
+    max-width:560px;
+    margin:0 0 40px;
+  }
+
+  /* caliper signature */
+  .caliper{ margin-top:8px; }
+  .caliper svg{ width:100%; height:auto; display:block; }
+  .caliper-caption{
+    display:flex; justify-content:space-between;
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px; color:var(--ink-faint);
+    margin-top:8px; letter-spacing:0.02em;
+  }
+  .caliper-caption b{ color:var(--brass); font-weight:600; }
+  .caliper-caption .v{ color:var(--verdi); font-weight:600; }
+
+  /* ---------- nav tabs ---------- */
+  nav.tabs{
+    position:sticky; top:0; z-index:50;
+    background:rgba(13,25,34,0.92);
+    backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--line-strong);
+  }
+  nav.tabs .row{
+    max-width:920px; margin:0 auto; padding:0 24px;
+    display:flex; gap:0; overflow-x:auto;
+  }
+  nav.tabs a{
+    font-family:'JetBrains Mono', monospace;
+    font-size:12px;
+    letter-spacing:0.05em;
+    color:var(--ink-faint);
+    text-decoration:none;
+    padding:16px 18px;
+    white-space:nowrap;
+    border-bottom:2px solid transparent;
+    transition:color .15s;
+  }
+  nav.tabs a:hover{ color:var(--ink); }
+  nav.tabs a .num{ color:var(--brass); margin-right:8px; }
+
+  /* ---------- sections ---------- */
+  main{ padding:56px 0 100px; }
+  section{ padding:0 24px 88px; }
+  section:last-child{ padding-bottom:40px; }
+
+  .sec-head{ max-width:920px; margin:0 auto 32px; }
+  .sec-index{
+    font-family:'JetBrains Mono', monospace;
+    font-size:30px; color:var(--brass);
+    letter-spacing:0.15em;
+    margin-bottom:10px;
+  }
+  h2.sec-title{
+    font-family:'Space Grotesk', sans-serif;
+    font-size:28px; font-weight:600;
+    margin:0 0 10px;
+  }
+  .sec-desc{ color:var(--ink-muted); font-size:15px; line-height:1.65; max-width:640px; }
+
+  .card{
+    max-width:920px; margin:0 auto;
+    background:var(--paper);
+    border:1px solid var(--line-strong);
+    border-radius:var(--radius);
+    padding:32px;
+  }
+  .card + .card{ margin-top:16px; }
+
+  /* theory grid */
+  .theory-grid{
+    max-width:920px; margin:0 auto;
+    display:grid; grid-template-columns:repeat(4,1fr); gap:1px;
+    background:var(--line-strong);
+    border:1px solid var(--line-strong);
+  }
+  .theory-cell{ background:var(--paper); padding:22px 20px; }
+  .theory-cell .k{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--ink-faint); letter-spacing:0.08em; text-transform:uppercase; margin-bottom:10px;}
+  .theory-cell .f{ font-family:'JetBrains Mono',monospace; font-size:14px; color:var(--brass); margin-bottom:8px; }
+  .theory-cell .d{ font-size:12.5px; color:var(--ink-muted); line-height:1.55; }
+  @media (max-width:760px){ .theory-grid{ grid-template-columns:1fr 1fr; } }
+
+  /* form controls */
+  .field-row{ display:flex; flex-wrap:wrap; gap:20px; margin-bottom:8px; }
+  .field{ flex:1; min-width:150px; }
+  .field label{
+    display:block; font-family:'JetBrains Mono',monospace; font-size:11px;
+    color:var(--ink-faint); margin-bottom:8px; letter-spacing:0.04em;
+  }
+  .field label .u{ color:var(--verdi); }
+  .field input{
+    width:100%;
+    background:var(--bg-2);
+    border:1px solid var(--line-strong);
+    color:var(--ink);
+    font-family:'JetBrains Mono',monospace;
+    font-size:15px;
+    padding:10px 12px;
+    border-radius:var(--radius);
+    outline:none;
+    transition:border-color .15s;
+  }
+  .field input:focus{ border-color:var(--brass); }
+
+  .divider{ height:1px; background:var(--line-strong); margin:28px 0; }
+
+  /* results */
+  .results{ display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:1px; background:var(--line-strong); border:1px solid var(--line-strong); margin-top:20px;}
+  .result{ background:var(--paper-2); padding:18px 18px 16px; }
+  .result .rk{ font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:8px; }
+  .result .rv{ font-family:'JetBrains Mono',monospace; font-size:22px; font-weight:600; color:var(--ink); }
+  .result .rv.brass{ color:var(--brass); }
+  .result .rv.verdi{ color:var(--verdi); }
+  .result .rv.coral{ color:var(--coral); }
+  .result .ru{ font-size:11px; color:var(--ink-faint); margin-top:4px; }
+
+  /* reveal solution */
+  .reveal-btn{
+    margin-top:24px;
+    background:transparent;
+    border:1px solid var(--brass);
+    color:var(--brass);
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;
+    letter-spacing:0.05em;
+    padding:11px 18px;
+    border-radius:var(--radius);
+    cursor:pointer;
+    display:inline-flex; align-items:center; gap:8px;
+    transition:background .15s, color .15s;
+  }
+  .reveal-btn:hover{ background:var(--brass); color:var(--bg); }
+  .reveal-btn .arrow{ transition:transform .2s; }
+  .reveal-btn.open .arrow{ transform:rotate(90deg); }
+
+  .solution{
+    max-height:0; overflow:hidden;
+    transition:max-height .35s ease;
+  }
+  .solution.open{ max-height:3200px; }
+  .solution-inner{ padding-top:24px; }
+  .step{
+    display:grid; grid-template-columns:28px 1fr; gap:14px;
+    padding:14px 0;
+    border-top:1px solid var(--line);
+  }
+  .step:first-child{ border-top:none; }
+  .step .sn{ font-family:'JetBrains Mono',monospace; color:var(--brass); font-size:13px; padding-top:2px;}
+  .step .st .st-title{ font-family:'Space Grotesk',sans-serif; font-size:14.5px; font-weight:600; margin-bottom:6px;}
+  .step .st .st-body{ font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--ink-muted); line-height:1.8; }
+  .step .st .st-body .eq{ color:var(--ink); }
+  .step .st .st-body .hi{ color:var(--brass); }
+  .step .st .st-body .hv{ color:var(--verdi); }
+
+  .conclusion{
+    margin-top:18px;
+    background:var(--brass-dim);
+    border-left:2px solid var(--brass);
+    padding:16px 18px;
+    font-size:13.5px;
+    line-height:1.7;
+    color:var(--ink);
+  }
+  .conclusion b{ color:var(--brass); }
+
+  /* chart */
+  .chart-wrap{ margin-top:24px; }
+  .legend{ display:flex; gap:20px; margin-bottom:14px; flex-wrap:wrap; }
+  .legend-item{ display:flex; align-items:center; gap:8px; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--ink-muted); }
+  .legend-item .sw{ width:14px; height:3px; border-radius:2px; }
+
+  .toggle-row{ display:flex; gap:10px; margin-top:18px; flex-wrap:wrap; }
+  .toggle{
+    font-family:'JetBrains Mono',monospace; font-size:11.5px;
+    padding:7px 14px; border-radius:20px;
+    border:1px solid var(--line-strong);
+    color:var(--ink-muted); cursor:pointer;
+    background:transparent;
+    transition:all .15s;
+  }
+  .toggle.active{ border-color:var(--verdi); color:var(--verdi); background:var(--verdi-dim); }
+
+  .note-flag{
+    display:inline-flex; align-items:center; gap:6px;
+    font-family:'JetBrains Mono',monospace; font-size:11px;
+    padding:4px 10px; border-radius:20px;
+    margin-top:6px;
+  }
+  .note-flag.ok{ background:var(--verdi-dim); color:var(--verdi); }
+  .note-flag.warn{ background:var(--coral-dim); color:var(--coral); }
+
+  footer{
+    border-top:1px solid var(--line-strong);
+    padding:36px 24px 60px;
+    text-align:center;
+  }
+  footer p{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--ink-faint); letter-spacing:0.04em; }
+
+  @media (max-width:600px){
+    .card{ padding:22px 18px; }
+    header.hero{ padding:56px 18px 40px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-inner">
+    <span class="crop tl"></span>
+    <div class="eyebrow"><span class="dash"></span>CÁLCULO I · DESAFÍO INTEGRADOR</div>
+    <h1 class="title">Error, aproximación<br>y <em>propagación</em>.</h1>
+    <p class="subtitle">Resuelve en vivo los tres ejercicios del desafío: cargá tus propios valores, mirá los resultados calcularse al instante, y desplegá el paso a paso cuando quieras verificar tu razonamiento.</p>
+
+    <div class="caliper">
+      <svg viewBox="0 0 800 90" preserveAspectRatio="xMidYMid meet">
+        <!-- reference scale (true value) -->
+        <line x1="20" y1="30" x2="780" y2="30" stroke="#6fbfb0" stroke-width="1.5" opacity="0.55"/>
+        <g stroke="#6fbfb0" stroke-width="1.5" opacity="0.55">
+          <line x1="20" y1="24" x2="20" y2="36"/>
+          <line x1="120" y1="26" x2="120" y2="34"/>
+          <line x1="220" y1="26" x2="220" y2="34"/>
+          <line x1="320" y1="26" x2="320" y2="34"/>
+          <line x1="420" y1="24" x2="420" y2="36"/>
+          <line x1="520" y1="26" x2="520" y2="34"/>
+          <line x1="620" y1="26" x2="620" y2="34"/>
+          <line x1="720" y1="26" x2="720" y2="34"/>
+          <line x1="780" y1="24" x2="780" y2="36"/>
+        </g>
+        <!-- measured jaw (approx value), offset -->
+        <line x1="20" y1="60" x2="446" y2="60" stroke="#e3a15b" stroke-width="2.5"/>
+        <line x1="20" y1="52" x2="20" y2="68" stroke="#e3a15b" stroke-width="2.5"/>
+        <line x1="446" y1="52" x2="446" y2="68" stroke="#e3a15b" stroke-width="2.5"/>
+        <!-- true endpoint marker -->
+        <line x1="420" y1="46" x2="420" y2="74" stroke="#6fbfb0" stroke-width="2"/>
+        <!-- error gap -->
+        <line x1="420" y1="60" x2="446" y2="60" stroke="#e2694b" stroke-width="4"/>
+        <text x="433" y="45" text-anchor="middle" font-family="JetBrains Mono" font-size="12" fill="#e2694b">Ea</text>
+      </svg>
+      <div class="caliper-caption">
+        <span><span class="v">▬</span> escala de referencia — <b class="v" style="color:var(--verdi)">xᵥ</b></span>
+        <span><span style="color:var(--brass)">▬</span> mordaza de medición — <b>xₐ</b></span>
+        <span style="color:var(--coral)">brecha = error absoluto</span>
+      </div>
+    </div>
+
+    <span class="crop br"></span>
+  </div>
+</header>
+
+<nav class="tabs">
+  <div class="row">
+    <a href="#teoria"><span class="num">00</span>Marco teórico</a>
+    <a href="#ej1"><span class="num">01</span>Placa cuadrada</a>
+    <a href="#ej2"><span class="num">02</span>Taylor de eˣ</a>
+    <a href="#ej3"><span class="num">03</span>Péndulo</a>
+  </div>
+</nav>
+
+<main>
+
+  <!-- ===================== TEORÍA ===================== -->
+  <section id="teoria">
+    <div class="sec-head">
+      <div class="sec-index">00 / REPASO</div>
+      <h2 class="sec-title">Las cuatro herramientas</h2>
+      <p class="sec-desc">Cada ejercicio combina estos cuatro conceptos. Tenelos a mano mientras trabajás.</p>
+    </div>
+    <div class="theory-grid">
+      <div class="theory-cell">
+        <div class="k">Error absoluto</div>
+        <div class="f">Ea = |xᵥ − xₐ|</div>
+        <div class="d">Diferencia entre el valor verdadero y el aproximado. Mismas unidades que la magnitud.</div>
+      </div>
+      <div class="theory-cell">
+        <div class="k">Error relativo %</div>
+        <div class="f">Er = (Ea / |xᵥ|) × 100</div>
+        <div class="d">Adimensional. Permite comparar precisión entre mediciones de distinta escala.</div>
+      </div>
+      <div class="theory-cell">
+        <div class="k">Serie de Taylor</div>
+        <div class="f">Pₙ(x) = Σ f⁽ᵏ⁾(a)/k! · (x−a)ᵏ</div>
+        <div class="d">Aproxima f cerca de x=a. El residuo de Lagrange Rₙ acota el error de truncamiento.</div>
+      </div>
+      <div class="theory-cell">
+        <div class="k">Propagación</div>
+        <div class="f">Δy ≈ |f'(x)| · Δx</div>
+        <div class="d">Cómo la incertidumbre de una medición de entrada se traslada a una magnitud calculada.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== EJERCICIO 1 ===================== -->
+  <section id="ej1">
+    <div class="sec-head">
+      <div class="sec-index">01 / EJERCICIO</div>
+      <h2 class="sec-title">Error absoluto, relativo y propagación</h2>
+      <p class="sec-desc">Un ingeniero mide el lado de una placa cuadrada. Cargá el valor medido y el de referencia — el área y su error propagado se recalculan solos.</p>
+    </div>
+    <div class="card">
+      <div class="field-row">
+        <div class="field">
+          <label>Valor de referencia <span class="u">xᵥ (cm)</span></label>
+          <input type="number" id="e1-xv" value="12.5" step="0.01">
+        </div>
+        <div class="field">
+          <label>Valor medido <span class="u">xₐ (cm)</span></label>
+          <input type="number" id="e1-xa" value="12.4" step="0.01">
+        </div>
+      </div>
+
+      <div class="results" id="e1-results"></div>
+
+      <button class="reveal-btn" data-target="e1-sol">
+        <span class="arrow">▸</span> Ver resolución paso a paso
+      </button>
+      <div class="solution" id="e1-sol">
+        <div class="solution-inner" id="e1-sol-body"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== EJERCICIO 2 ===================== -->
+  <section id="ej2">
+    <div class="sec-head">
+      <div class="sec-index">02 / EJERCICIO</div>
+      <h2 class="sec-title">Taylor, error de aproximación y residuo de Lagrange</h2>
+      <p class="sec-desc">f(x) = eˣ, desarrollada alrededor de a = 0. Compará el polinomio de grado 1 y de grado 2 contra el valor real, y contra la cota de Lagrange.</p>
+    </div>
+    <div class="card">
+      <div class="field-row">
+        <div class="field">
+          <label>Punto a evaluar <span class="u">x</span></label>
+          <input type="number" id="e2-x" value="0.3" step="0.01">
+        </div>
+      </div>
+
+      <div class="chart-wrap">
+        <div class="legend">
+          <div class="legend-item"><span class="sw" style="background:#6fbfb0"></span> f(x) = eˣ (real)</div>
+          <div class="legend-item"><span class="sw" style="background:#e3a15b"></span> P₁(x) — grado 1</div>
+          <div class="legend-item"><span class="sw" style="background:#e2694b"></span> P₂(x) — grado 2</div>
+        </div>
+        <svg id="e2-chart" viewBox="0 0 800 320" style="width:100%; height:auto; display:block;"></svg>
+      </div>
+
+      <div class="results" id="e2-results"></div>
+
+      <button class="reveal-btn" data-target="e2-sol">
+        <span class="arrow">▸</span> Ver resolución paso a paso
+      </button>
+      <div class="solution" id="e2-sol">
+        <div class="solution-inner" id="e2-sol-body"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== EJERCICIO 3 ===================== -->
+  <section id="ej3">
+    <div class="sec-head">
+      <div class="sec-index">03 / EJERCICIO</div>
+      <h2 class="sec-title">Síntesis integradora — péndulo simple</h2>
+      <p class="sec-desc">g = 4π²L / T². Medí L y T con sus incertidumbres, y compará el error propagado contra la discrepancia real frente a g = 9.8 m/s².</p>
+    </div>
+    <div class="card">
+      <div class="field-row">
+        <div class="field"><label>Longitud <span class="u">L (m)</span></label><input type="number" id="e3-L" value="1.000" step="0.001"></div>
+        <div class="field"><label>Incertidumbre <span class="u">ΔL (m)</span></label><input type="number" id="e3-dL" value="0.002" step="0.001"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Período <span class="u">T (s)</span></label><input type="number" id="e3-T" value="2.006" step="0.001"></div>
+        <div class="field"><label>Incertidumbre <span class="u">ΔT (s)</span></label><input type="number" id="e3-dT" value="0.004" step="0.001"></div>
+      </div>
+
+      <div class="divider"></div>
+      <div style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:14px;">a · b — valor experimental vs. referencia</div>
+      <div class="results" id="e3-results-ab"></div>
+
+      <div class="divider"></div>
+      <div style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:14px;">c — propagación del error</div>
+      <div class="results" id="e3-results-c"></div>
+      <div id="e3-coherence"></div>
+
+      <div class="divider"></div>
+      <div style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:14px;">d — aproximación lineal de Taylor en T = 2</div>
+      <div class="results" id="e3-results-d"></div>
+
+      <button class="reveal-btn" data-target="e3-sol">
+        <span class="arrow">▸</span> Ver resolución paso a paso
+      </button>
+      <div class="solution" id="e3-sol">
+        <div class="solution-inner" id="e3-sol-body"></div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <p>DESAFÍO INTEGRADOR · CÁLCULO I — ERROR ABSOLUTO, ERROR RELATIVO, SERIES DE TAYLOR Y PROPAGACIÓN DEL ERROR</p>
+</footer>
+
+<script>
+function fmt(n, d=4){
+  if(!isFinite(n)) return '—';
+  return n.toLocaleString('es-AR', {minimumFractionDigits:d, maximumFractionDigits:d});
+}
+function fmtSig(n, d=6){
+  if(!isFinite(n)) return '—';
+  return Number(n.toPrecision(d)).toString();
+}
+
+/* ---------------- reveal buttons ---------------- */
+document.querySelectorAll('.reveal-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const target = document.getElementById(btn.dataset.target);
+    const opening = !target.classList.contains('open');
+    target.classList.toggle('open');
+    btn.classList.toggle('open');
+    btn.querySelector('span:last-child') ? null : null;
+    btn.lastChild.textContent = opening ? ' Ocultar resolución' : ' Ver resolución paso a paso';
+  });
+});
+
+/* ================= EJERCICIO 1 ================= */
+function computeE1(){
+  const xv = parseFloat(document.getElementById('e1-xv').value);
+  const xa = parseFloat(document.getElementById('e1-xa').value);
+  const Ea = Math.abs(xv - xa);
+  const Er = (Ea/Math.abs(xv))*100;
+  const A = xv*xv;
+  const dA = 2*xv*Ea;
+  const ErA = (dA/A)*100;
+
+  document.getElementById('e1-results').innerHTML = `
+    <div class="result"><div class="rk">a · Error absoluto</div><div class="rv coral">${fmt(Ea,2)}</div><div class="ru">cm</div></div>
+    <div class="result"><div class="rk">b · Error relativo</div><div class="rv coral">${fmt(Er,3)}</div><div class="ru">%</div></div>
+    <div class="result"><div class="rk">c · ΔA propagado</div><div class="rv brass">${fmt(dA,2)}</div><div class="ru">cm²</div></div>
+    <div class="result"><div class="rk">d · Er(A) propagado</div><div class="rv brass">${fmt(ErA,3)}</div><div class="ru">%</div></div>
+  `;
+
+  document.getElementById('e1-sol-body').innerHTML = `
+    <div class="step"><div class="sn">a</div><div class="st">
+      <div class="st-title">Error absoluto</div>
+      <div class="st-body">Ea = |xᵥ − xₐ| = |<span class="hv">${fmt(xv,2)}</span> − <span class="hi">${fmt(xa,2)}</span>| = <span class="eq">${fmt(Ea,2)} cm</span></div>
+    </div></div>
+    <div class="step"><div class="sn">b</div><div class="st">
+      <div class="st-title">Error relativo porcentual</div>
+      <div class="st-body">Er(%) = (Ea / |xᵥ|) × 100 = (${fmt(Ea,2)} / ${fmt(xv,2)}) × 100 = <span class="eq">${fmt(Er,3)} %</span></div>
+    </div></div>
+    <div class="step"><div class="sn">c</div><div class="st">
+      <div class="st-title">Propagación al área — A = x²</div>
+      <div class="st-body">A'(x) = 2x, evaluada en x = xᵥ = ${fmt(xv,2)}<br>
+      ΔA ≈ |A'(xᵥ)| · Δx, con Δx = Ea = ${fmt(Ea,2)}<br>
+      ΔA ≈ 2(${fmt(xv,2)})(${fmt(Ea,2)}) = <span class="eq">${fmt(dA,2)} cm²</span></div>
+    </div></div>
+    <div class="step"><div class="sn">d</div><div class="st">
+      <div class="st-title">Error relativo porcentual propagado</div>
+      <div class="st-body">A(xᵥ) = ${fmt(xv,2)}² = ${fmt(A,2)} cm²<br>
+      Er(A)(%) = (ΔA / A) × 100 = (${fmt(dA,2)} / ${fmt(A,2)}) × 100 = <span class="eq">${fmt(ErA,3)} %</span></div>
+    </div></div>
+    <div class="conclusion"><b>Lectura:</b> el error relativo se <em>duplica</em> al propagarse al área (${fmt(Er,2)}% → ${fmt(ErA,2)}%), porque A depende de x al cuadrado: un error relativo en x se amplifica aproximadamente ×2 en una magnitud que va como x².</div>
+  `;
+}
+['e1-xv','e1-xa'].forEach(id=>document.getElementById(id).addEventListener('input', computeE1));
+computeE1();
+
+/* ================= EJERCICIO 2 ================= */
+function drawE2Chart(x0){
+  const svg = document.getElementById('e2-chart');
+  const W=800, H=320, pad={l:46,r:20,t:20,b:36};
+  const xMin=-0.5, xMax=1.0;
+  const f = t=>Math.exp(t);
+  const yMin = 0, yMax = Math.max(f(xMax), 1+xMax+xMax*xMax/2)*1.08;
+
+  const sx = t => pad.l + (t-xMin)/(xMax-xMin)*(W-pad.l-pad.r);
+  const sy = v => H-pad.b - (v-yMin)/(yMax-yMin)*(H-pad.t-pad.b);
+
+  const N=80;
+  let pathF='', pathP1='', pathP2='';
+  for(let i=0;i<=N;i++){
+    const t = xMin + (xMax-xMin)*i/N;
+    const vf = f(t), v1 = 1+t, v2 = 1+t+t*t/2;
+    pathF += (i===0?'M':'L') + sx(t).toFixed(2) + ',' + sy(vf).toFixed(2) + ' ';
+    pathP1 += (i===0?'M':'L') + sx(t).toFixed(2) + ',' + sy(v1).toFixed(2) + ' ';
+    pathP2 += (i===0?'M':'L') + sx(t).toFixed(2) + ',' + sy(v2).toFixed(2) + ' ';
+  }
+
+  // gridlines + axis ticks
+  let grid='';
+  for(let gx=-0.4; gx<=1.0; gx+=0.2){
+    grid += `<line x1="${sx(gx).toFixed(1)}" y1="${pad.t}" x2="${sx(gx).toFixed(1)}" y2="${H-pad.b}" stroke="rgba(143,196,204,0.08)" stroke-width="1"/>`;
+    grid += `<text x="${sx(gx).toFixed(1)}" y="${H-pad.b+18}" font-family="JetBrains Mono" font-size="10" fill="#5d7078" text-anchor="middle">${gx.toFixed(1)}</text>`;
+  }
+
+  const px = sx(x0), py = sy(f(x0));
+
+  svg.innerHTML = `
+    ${grid}
+    <line x1="${pad.l}" y1="${H-pad.b}" x2="${W-pad.r}" y2="${H-pad.b}" stroke="rgba(143,196,204,0.3)" stroke-width="1"/>
+    <path d="${pathF}" fill="none" stroke="#6fbfb0" stroke-width="2"/>
+    <path d="${pathP1}" fill="none" stroke="#e3a15b" stroke-width="1.6" stroke-dasharray="6 4"/>
+    <path d="${pathP2}" fill="none" stroke="#e2694b" stroke-width="1.6" stroke-dasharray="2 3"/>
+    <line x1="${px.toFixed(2)}" y1="${pad.t}" x2="${px.toFixed(2)}" y2="${H-pad.b}" stroke="rgba(255,255,255,0.18)" stroke-width="1" stroke-dasharray="3 3"/>
+    <circle cx="${px.toFixed(2)}" cy="${py.toFixed(2)}" r="4" fill="#6fbfb0"/>
+    <text x="${px.toFixed(2)}" y="${pad.t+12}" font-family="JetBrains Mono" font-size="11" fill="#e9efee" text-anchor="middle">x = ${x0}</text>
+  `;
+}
+
+function computeE2(){
+  const x = parseFloat(document.getElementById('e2-x').value);
+  const real = Math.exp(x);
+  const P1 = 1 + x;
+  const P2 = 1 + x + x*x/2;
+  const Ea1 = Math.abs(real - P1), Er1 = Ea1/real*100;
+  const Ea2 = Math.abs(real - P2), Er2 = Ea2/real*100;
+  const R2bound = Math.exp(Math.max(x,0)) / 6 * Math.pow(Math.abs(x),3);
+
+  drawE2Chart(x);
+
+  document.getElementById('e2-results').innerHTML = `
+    <div class="result"><div class="rk">Valor real eˣ</div><div class="rv verdi">${fmtSig(real,7)}</div></div>
+    <div class="result"><div class="rk">P₁(x) grado 1</div><div class="rv brass">${fmt(P1,4)}</div></div>
+    <div class="result"><div class="rk">P₂(x) grado 2</div><div class="rv coral">${fmt(P2,6)}</div></div>
+    <div class="result"><div class="rk">Ea, Er — P₁</div><div class="rv brass">${fmtSig(Ea1,4)}</div><div class="ru">${fmt(Er1,3)} %</div></div>
+    <div class="result"><div class="rk">Ea, Er — P₂</div><div class="rv coral">${fmtSig(Ea2,4)}</div><div class="ru">${fmt(Er2,4)} %</div></div>
+    <div class="result"><div class="rk">Cota R₂ (Lagrange)</div><div class="rv">${fmtSig(R2bound,4)}</div><div class="ru">≥ Ea de P₂</div></div>
+  `;
+
+  document.getElementById('e2-sol-body').innerHTML = `
+    <div class="step"><div class="sn">a</div><div class="st">
+      <div class="st-title">Polinomios de Taylor en a = 0</div>
+      <div class="st-body">f(x)=eˣ ⟹ f(0)=f'(0)=f''(0)=1<br>
+      P₁(x) = 1 + x<br>
+      P₂(x) = 1 + x + x²/2</div>
+    </div></div>
+    <div class="step"><div class="sn">b</div><div class="st">
+      <div class="st-title">Aproximación de e^(${x})</div>
+      <div class="st-body">P₁(${x}) = 1 + ${x} = <span class="eq">${fmt(P1,4)}</span><br>
+      P₂(${x}) = 1 + ${x} + ${x}²/2 = <span class="eq">${fmt(P2,6)}</span></div>
+    </div></div>
+    <div class="step"><div class="sn">c</div><div class="st">
+      <div class="st-title">Comparación con el valor real</div>
+      <div class="st-body">e^(${x}) = <span class="hv">${fmtSig(real,8)}</span><br><br>
+      P₁ → Ea = ${fmtSig(Ea1,5)} ; Er(%) = <span class="eq">${fmt(Er1,3)} %</span><br>
+      P₂ → Ea = ${fmtSig(Ea2,5)} ; Er(%) = <span class="eq">${fmt(Er2,4)} %</span></div>
+    </div></div>
+    <div class="step"><div class="sn">d</div><div class="st">
+      <div class="st-title">Cota del residuo de Lagrange</div>
+      <div class="st-body">R₂(x) = f'''(ξ)/3! · x³, con ξ ∈ (0, ${x}) y f'''(ξ)=e^ξ<br>
+      Se acota e^ξ ≤ e^(${x}) (cota superior en el intervalo)<br>
+      R₂ ≤ e^(${x})/6 · (${x})³ = <span class="eq">${fmtSig(R2bound,5)}</span><br><br>
+      Como ${fmtSig(R2bound,4)} ${R2bound>=Ea2?'≥':'<'} ${fmtSig(Ea2,4)} (error real de P₂), la cota <span class="hi">${R2bound>=Ea2?'sí cumple':'no cumple'}</span> su rol de cota superior.</div>
+    </div></div>
+    <div class="conclusion"><b>Lectura:</b> agregar el término de grado 2 reduce el error de ${fmt(Er1,2)}% a ${fmt(Er2,3)}%. La cota de Lagrange sobreestima el error real (como debe hacer una cota), confirmando que P₂ es una aproximación confiable en este entorno de a = 0.</div>
+  `;
+}
+document.getElementById('e2-x').addEventListener('input', computeE2);
+computeE2();
+
+/* ================= EJERCICIO 3 ================= */
+function computeE3(){
+  const L = parseFloat(document.getElementById('e3-L').value);
+  const dL = parseFloat(document.getElementById('e3-dL').value);
+  const T = parseFloat(document.getElementById('e3-T').value);
+  const dT = parseFloat(document.getElementById('e3-dT').value);
+  const gReal = 9.8;
+  const PI2 = Math.PI*Math.PI;
+
+  const gExp = 4*PI2*L/(T*T);
+  const Ea = Math.abs(gReal - gExp);
+  const Er = Ea/gReal*100;
+
+  const dgdL = 4*PI2/(T*T);
+  const dgdT = -8*PI2*L/(T*T*T);
+  const dg = Math.abs(dgdL)*dL + Math.abs(dgdT)*dT;
+
+  const coherent = dg >= Ea;
+
+  // Taylor around T=2 (L fixed at current L)
+  const Tanchor = 2;
+  const gAnchor = 4*PI2*L/(Tanchor*Tanchor);
+  const gpAnchor = -8*PI2*L/Math.pow(Tanchor,3);
+  const P1atT = gAnchor + gpAnchor*(T-Tanchor);
+  const diffTaylor = Math.abs(gExp - P1atT);
+
+  document.getElementById('e3-results-ab').innerHTML = `
+    <div class="result"><div class="rk">g experimental</div><div class="rv brass">${fmt(gExp,4)}</div><div class="ru">m/s²</div></div>
+    <div class="result"><div class="rk">g de referencia</div><div class="rv verdi">${fmt(gReal,4)}</div><div class="ru">m/s²</div></div>
+    <div class="result"><div class="rk">Error absoluto</div><div class="rv coral">${fmt(Ea,4)}</div><div class="ru">m/s²</div></div>
+    <div class="result"><div class="rk">Error relativo</div><div class="rv coral">${fmt(Er,3)}</div><div class="ru">%</div></div>
+  `;
+
+  document.getElementById('e3-results-c').innerHTML = `
+    <div class="result"><div class="rk">∂g/∂L</div><div class="rv">${fmt(dgdL,4)}</div></div>
+    <div class="result"><div class="rk">∂g/∂T</div><div class="rv">${fmt(dgdT,4)}</div></div>
+    <div class="result"><div class="rk">Δg propagado</div><div class="rv brass">${fmt(dg,4)}</div><div class="ru">m/s²</div></div>
+    <div class="result"><div class="rk">Δg vs Ea</div><div class="rv ${coherent?'verdi':'coral'}">${dg>=Ea?'≥':'<'}</div><div class="ru">Δg=${fmt(dg,3)} · Ea=${fmt(Ea,3)}</div></div>
+  `;
+  document.getElementById('e3-coherence').innerHTML = `<span class="note-flag ${coherent?'ok':'warn'}">${coherent ? '✓ la incertidumbre experimental cubre la discrepancia observada' : '⚠ la discrepancia supera la incertidumbre estimada'}</span>`;
+
+  document.getElementById('e3-results-d').innerHTML = `
+    <div class="result"><div class="rk">g(2) — ancla</div><div class="rv">${fmt(gAnchor,4)}</div></div>
+    <div class="result"><div class="rk">g'(2)</div><div class="rv">${fmt(gpAnchor,4)}</div></div>
+    <div class="result"><div class="rk">P₁(${fmt(T,3)})</div><div class="rv brass">${fmt(P1atT,4)}</div></div>
+    <div class="result"><div class="rk">Diferencia vs g exp.</div><div class="rv">${fmtSig(diffTaylor,4)}</div></div>
+  `;
+
+  document.getElementById('e3-sol-body').innerHTML = `
+    <div class="step"><div class="sn">a</div><div class="st">
+      <div class="st-title">Valor experimental de g</div>
+      <div class="st-body">g = 4π²L / T² = 4π²(${fmt(L,3)}) / (${fmt(T,3)})² = <span class="eq">${fmt(gExp,4)} m/s²</span><br>
+      Ea = |9.8 − ${fmt(gExp,4)}| = <span class="eq">${fmt(Ea,4)} m/s²</span><br>
+      Er(%) = (Ea/9.8) × 100 = <span class="eq">${fmt(Er,3)} %</span></div>
+    </div></div>
+    <div class="step"><div class="sn">b</div><div class="st">
+      <div class="st-title">Derivadas parciales</div>
+      <div class="st-body">∂g/∂L = 4π²/T² = <span class="eq">${fmt(dgdL,4)}</span><br>
+      ∂g/∂T = −8π²L/T³ = <span class="eq">${fmt(dgdT,4)}</span></div>
+    </div></div>
+    <div class="step"><div class="sn">c</div><div class="st">
+      <div class="st-title">Propagación del error</div>
+      <div class="st-body">Δg ≈ |∂g/∂L|·ΔL + |∂g/∂T|·ΔT<br>
+      Δg ≈ |${fmt(dgdL,3)}|(${fmt(dL,3)}) + |${fmt(dgdT,3)}|(${fmt(dT,3)}) = <span class="eq">${fmt(dg,4)} m/s²</span><br><br>
+      Comparando con Ea = ${fmt(Ea,4)}: <span class="hi">${coherent? 'Δg cubre la discrepancia observada, la incertidumbre experimental es coherente con el resultado.' : 'Δg no alcanza a explicar la discrepancia — hay una fuente de error adicional no contemplada (sistemática, redondeo, etc.).'}</span></div>
+    </div></div>
+    <div class="step"><div class="sn">d</div><div class="st">
+      <div class="st-title">Taylor de grado 1 de g(T) en T=2</div>
+      <div class="st-body">g(T) = 4π²L/T², con L=${fmt(L,3)} fijo<br>
+      g(2) = 4π²L/4 = <span class="eq">${fmt(gAnchor,4)}</span><br>
+      g'(T) = −8π²L/T³ ⟹ g'(2) = <span class="eq">${fmt(gpAnchor,4)}</span><br>
+      P₁(T) = g(2) + g'(2)(T−2)<br>
+      P₁(${fmt(T,3)}) = ${fmt(gAnchor,4)} + (${fmt(gpAnchor,4)})(${fmt(T-2,3)}) = <span class="eq">${fmt(P1atT,4)}</span><br><br>
+      Frente al cálculo directo (${fmt(gExp,4)}), difieren en ${fmtSig(diffTaylor,3)} — la pequeña discrepancia es el término cuadrático que la aproximación lineal descarta.</div>
+    </div></div>
+    <div class="conclusion"><b>Lectura:</b> el término lineal g'(2)(T−2) de la aproximación de Taylor es estructuralmente la misma expresión que aparece en la fórmula de propagación de primer orden (|f'(x)|·Δx). Ambas herramientas son la misma idea: usar la derivada como factor de sensibilidad ante un cambio pequeño en la variable.</div>
+  `;
+}
+['e3-L','e3-dL','e3-T','e3-dT'].forEach(id=>document.getElementById(id).addEventListener('input', computeE3));
+computeE3();
+</script>
+
+</body>
+</html>
